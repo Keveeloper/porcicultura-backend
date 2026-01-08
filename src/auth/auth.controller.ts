@@ -21,6 +21,7 @@ export class AuthController {
    */
   @Post('google/login')
   async googleLogin(@Headers('authorization') authHeader: string) {
+    //Modify porcicultura software
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       throw new UnauthorizedException('Token de autorización no proporcionado o formato inválido.');
     }
