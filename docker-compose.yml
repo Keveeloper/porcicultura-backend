@@ -1,0 +1,29 @@
+services:  
+  postgres-porcicultura:
+    image: postgres:15-alpine
+    container_name: postgres-porcicultura
+    environment:
+      POSTGRES_DB: porcicultura_db
+      POSTGRES_USER: porcicultura_user
+      POSTGRES_PASSWORD: porcicultura_password
+    ports:
+      - '5434:5432'
+    volumes:
+      - porcicultura_postgres_data:/var/lib/postgresql/data
+  pgadmin-porcicultura:
+    image: dpage/pgadmin4:latest
+    container_name: pgadmin-porcicultura
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@porcicultura.com
+      PGADMIN_DEFAULT_PASSWORD: admin_password
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    ports:
+      - '5051:80'
+    volumes:
+      - porcicultura_pgadmin_data:/var/lib/pgadmin
+    depends_on:
+      - postgres-porcicultura
+
+volumes:
+  porcicultura_postgres_data:
+  porcicultura_pgadmin_data:
