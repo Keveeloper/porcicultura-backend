@@ -4,6 +4,7 @@ import { UsersModule } from './users/users.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { FirebaseModule } from './firebase/firebase.module';
 import { AuthModule } from './auth/auth.module';
+import { CompaniesModule } from './companies/companies.module';
 
 @Module({
   imports: [
@@ -21,12 +22,13 @@ import { AuthModule } from './auth/auth.module';
         password: configService.get<string>('POSTGRES_PASSWORD'),
         database: configService.get<string>('POSTGRES_DB'),
         autoLoadEntities: true,
-        synchronize: false, // never use TRUE in production
+        synchronize: true, // never use TRUE in production
       }),
     }),
     UsersModule,
     FirebaseModule,
-    AuthModule
+    AuthModule,
+    CompaniesModule
   ],
 })
 export class AppModule {}

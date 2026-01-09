@@ -1,6 +1,7 @@
-import { Column, CreateDateColumn, Entity, JoinColumn, OneToOne, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, OneToOne, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 import { Profile } from './profile.entity';
 import { Exclude } from 'class-transformer';
+import { Company } from '../../companies/entities/company.entity';
 
 // Solo email y password
 @Entity({ name: 'users' })
@@ -22,6 +23,11 @@ export class User {
   @Exclude()
   @Column({type: 'varchar', length: 255, name: 'password', nullable: true})
   password: string;
+
+  // Relación ManyToOne: Muchos usuarios pertenecen a una compañía
+  @ManyToOne(() => Company, (company) => company.users, { nullable: true })
+  @JoinColumn({ name: 'company_id' })
+  company: Company;
 
   @CreateDateColumn({ type: 'timestamptz', default: () => 'CURRENT_TIMESTAMP', name: 'created_at' })
   createdAt: Date;
