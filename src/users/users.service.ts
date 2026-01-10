@@ -22,7 +22,8 @@ export class UsersService {
   async findOrCreate(firebaseUser: CreateUserDto): Promise<User> {
     try {      
       const existingUser = await this.userRepository.findOne({
-        where: { email: firebaseUser.email }
+        where: { email: firebaseUser.email },
+        relations: ['company', 'profile']
       });      
   
       if (existingUser) {
