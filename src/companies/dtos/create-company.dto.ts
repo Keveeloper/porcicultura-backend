@@ -8,8 +8,5 @@ export class CreateCompanyDto {
   @IsString()
   @IsNotEmpty()
   nit: string;
-
-  @IsString()
-  @IsOptional()
-  address?: string;
+    
 }

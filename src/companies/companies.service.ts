@@ -15,20 +15,17 @@ export class CompaniesService {
   ) {}
 
   async createAndAssign(userId: string, createCompanyDto: CreateCompanyDto) {
-    // 1. Verificar si el usuario existe
     const user = await this.userRepository.findOne({ where: { id: userId } });
-    if (!user) throw new NotFoundException('Usuario no encontrado');
+    if (!user) throw new NotFoundException('User not found');
 
-    // 2. Crear la nueva empresa
     const newCompany = this.companyRepository.create(createCompanyDto);
     const savedCompany = await this.companyRepository.save(newCompany);
 
-    // 3. Vincular la empresa al usuario
     user.company = savedCompany;
     await this.userRepository.save(user);
 
     return {
-      message: 'Compañía creada y vinculada con éxito',
+      message: 'Company created and related successfuly',
       company: savedCompany,
     };
   }

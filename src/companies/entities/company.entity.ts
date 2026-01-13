@@ -11,10 +11,7 @@ export class Company {
     name: string;
 
     @Column({ type: 'varchar', length: 100, unique: true, nullable: true })
-    nit: string;
-
-    @Column({ type: 'varchar', length: 255, nullable: true })
-    address: string;
+    nit: string;   
 
     // Una compañía puede tener muchos usuarios
     @OneToMany(() => User, (user) => user.company)

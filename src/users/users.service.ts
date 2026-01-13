@@ -42,7 +42,7 @@ export class UsersService {
   
       return await this.userRepository.save(newUser);
     } catch (error) {
-      console.log(error);
+      // console.log(error);
       return error;
     }
   }
