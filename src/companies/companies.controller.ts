@@ -15,6 +15,6 @@ export class CompaniesController {
     @CurrentUser() user: { userId: string },
     // @Body('userId') userId: string, // En una app real, esto vendría del JWT decodificado
   ) {
-    return this.companiesService.createAndAssignUser(user.userId, createCompanyDto);
+    return await this.companiesService.createAndAssignUser(user.userId, createCompanyDto);
   }
 }
