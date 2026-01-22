@@ -6,7 +6,7 @@ import { map } from 'rxjs/operators';
 export class WrapResponseInterceptor implements NestInterceptor {
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
 
-    // Si la respuesta es una promesa (como la de tu service), el 'data' es el resultado final.
+    // Si la respuesta es una promesa el 'data' es el resultado final.
     return next.handle().pipe(
       map((data: unknown) => {
         // Solo envuelve la respuesta si no es null/undefined y si no es ya un objeto de error

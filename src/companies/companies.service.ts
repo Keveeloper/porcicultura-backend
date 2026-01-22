@@ -14,7 +14,7 @@ export class CompaniesService {
     private userRepository: Repository<User>,
   ) {}
 
-  async createAndAssign(userId: string, createCompanyDto: CreateCompanyDto) {
+  async createAndAssignUser(userId: string, createCompanyDto: CreateCompanyDto) {
     const user = await this.userRepository.findOne({ where: { id: userId } });
     if (!user) throw new NotFoundException('User not found');
 
