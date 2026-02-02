@@ -1,5 +1,6 @@
 import { Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 import { User } from "../../users/entities/user.entity";
+import { Batch } from "src/batches/entities/batch.entity";
 
 @Entity({ name: 'companies' })
 export class Company {
@@ -16,6 +17,10 @@ export class Company {
     // Una compañía puede tener muchos usuarios
     @OneToMany(() => User, (user) => user.company)
     users: User[];
+
+    // Una compañía puede tener muchos lotes
+    @OneToMany(() => User, (user) => user.company)
+    batches: Batch[];
 
     @CreateDateColumn({ type: 'timestamptz', default: () => 'CURRENT_TIMESTAMP', name: 'created_at' })
     createdAt: Date;
