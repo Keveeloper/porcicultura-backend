@@ -5,8 +5,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { FirebaseModule } from './firebase/firebase.module';
 import { AuthModule } from './auth/auth.module';
 import { CompaniesModule } from './companies/companies.module';
-import { BatchesController } from './batches/batches.controller';
-import { BatchesService } from './batches/batches.service';
+import { BatchStagesModule } from './batch_stages/batch_stages.module';
 import { BatchesModule } from './batches/batches.module';
 
 @Module({
@@ -32,9 +31,8 @@ import { BatchesModule } from './batches/batches.module';
     FirebaseModule,
     AuthModule,
     CompaniesModule,
-    BatchesModule
+    BatchesModule,
+    BatchStagesModule
   ],
-  controllers: [BatchesController],
-  providers: [BatchesService],
 })
 export class AppModule {}

@@ -1,17 +1,9 @@
-import { IsString, IsNotEmpty, IsNumber, IsUUID } from 'class-validator';
+import { IsString, IsNotEmpty, IsUUID } from 'class-validator';
 
 export class CreateBatchDto {
   @IsString()
   @IsNotEmpty()
   batch_number: string;
-
-  @IsNumber()
-  @IsNotEmpty()
-  initialTotalWeight: number;
-
-  @IsNumber()
-  @IsNotEmpty()
-  initialPigWeight: number;
 
   @IsUUID()
   @IsNotEmpty()

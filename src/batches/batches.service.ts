@@ -15,9 +15,9 @@ export class BatchesService {
     async create(createBatchDto: CreateBatchDto) {
         const { batch_number, companyId } = createBatchDto;
         const existingBatch = await this.batchRepository.findOne({
-            where: { 
-                batch_number, 
-                company: { id: companyId } 
+            where: {
+                batch_number,
+                company: { id: companyId }
             }
         });
         if (existingBatch) {

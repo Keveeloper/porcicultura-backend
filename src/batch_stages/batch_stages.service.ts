@@ -1,0 +1,49 @@
+import { BadRequestException, Injectable, InternalServerErrorException } from '@nestjs/common';
+import { CreateBatchStageDto } from './dto/create-batch_stage.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { BatchStage } from './entities/batch_stage.entity';
+import { Repository } from 'typeorm';
+
+@Injectable()
+export class BatchStagesService {
+  constructor(
+    @InjectRepository(BatchStage)
+    private readonly batchStageRepository: Repository<BatchStage>,
+  ) {}
+
+  async create(createBatchStageDto: CreateBatchStageDto) {
+    const { batchId, stage_type } = createBatchStageDto;
+
+    const existingBatchStage = await this.batchStageRepository.findOne({
+      where: {
+        batch: { id: batchId },
+        stage_type: stage_type,
+      },
+    });
+
+    if (existingBatchStage) {
+      throw new BadRequestException(
+        `The stage ${stage_type} has already been created for this batch.`,
+      );
+    }
+
+    try {
+      const start_date = new Date(createBatchStageDto.start_date);
+      const number_of_weeks = createBatchStageDto.number_of_weeks;
+      const end_date = new Date(
+        start_date.getTime() + number_of_weeks * 7 * 24 * 60 * 60 * 1000,
+      );
+      createBatchStageDto['end_date'] = end_date;
+      const newBatchStage = this.batchStageRepository.create({
+        ...createBatchStageDto,
+        end_date: end_date,
+        batch: { id: batchId }
+      });
+
+      return await this.batchStageRepository.save(newBatchStage);
+    } catch (error) {
+      throw new InternalServerErrorException('Error creating batch stage', error.message);
+    }
+  }
+
+}
