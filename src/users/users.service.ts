@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
+import { Injectable, NotFoundException, ConflictException, InternalServerErrorException } from '@nestjs/common';
 import { CreateUserDto } from './dtos/create-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
@@ -20,16 +20,16 @@ export class UsersService {
   }
 
   async findOrCreate(firebaseUser: CreateUserDto): Promise<User> {
-    try {      
+    try {
       const existingUser = await this.userRepository.findOne({
         where: { email: firebaseUser.email },
         relations: ['company', 'profile']
-      });      
-  
+      });
+
       if (existingUser) {
         return existingUser;
       }
-  
+
       const newUser = this.userRepository.create({
         googleId: firebaseUser.uid,
         email: firebaseUser.email,
@@ -39,11 +39,10 @@ export class UsersService {
           avatar: firebaseUser.profile.avatar,
         }
       });
-  
+
       return await this.userRepository.save(newUser);
     } catch (error) {
-      // console.log(error);
-      return error;
+      throw new InternalServerErrorException('Error creating users: ', error.message)
     }
   }
 

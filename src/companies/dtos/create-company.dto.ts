@@ -1,4 +1,4 @@
-import { IsString, IsNotEmpty, IsOptional, Length } from 'class-validator';
+import { IsString, IsNotEmpty } from 'class-validator';
 
 export class CreateCompanyDto {
   @IsString()
@@ -8,5 +8,5 @@ export class CreateCompanyDto {
   @IsString()
   @IsNotEmpty()
   nit: string;
-    
+
 }

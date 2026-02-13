@@ -1,7 +1,8 @@
-import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
+import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 import { BatchStageType } from "./types";
 import { BatchStageStatus } from "./types";
 import { Batch } from "src/batches/entities/batch.entity";
+import { DailyMeal } from "src/daily_meals/entities/daily_meal.entity";
 
 @Entity({name: 'batch_stages'})
 export class BatchStage {
@@ -41,6 +42,9 @@ export class BatchStage {
   @ManyToOne(() => Batch, (batch) => batch.stages, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'batch_id' })
   batch: Batch;
+
+  @OneToMany(() => DailyMeal, (dailyMeal) => dailyMeal.batchStage)
+  dailyMeals: DailyMeal[];
 
   @CreateDateColumn({ type: 'timestamptz', default: () => 'CURRENT_TIMESTAMP', name: 'created_at' })
   createdAt: Date;

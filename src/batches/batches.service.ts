@@ -3,7 +3,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Batch } from './entities/batch.entity';
 import { Repository } from 'typeorm';
 import { CreateBatchDto } from './dtos/create-batch.dto';
-import { throwError } from 'rxjs';
 
 @Injectable()
 export class BatchesService {
@@ -30,7 +29,7 @@ export class BatchesService {
             });
             return await this.batchRepository.save(newBatch);
         } catch (error) {
-            throw new InternalServerErrorException('Error creating batch: ', error);
+            throw new InternalServerErrorException('Error creating batch: ', error.message);
         }
     }
 }

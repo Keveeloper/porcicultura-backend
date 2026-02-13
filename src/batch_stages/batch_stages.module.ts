@@ -8,6 +8,6 @@ import { TypeOrmModule } from '@nestjs/typeorm';
   imports: [TypeOrmModule.forFeature([BatchStage])],
   controllers: [BatchStagesController],
   providers: [BatchStagesService],
-  exports: [BatchStagesService],
+  exports: [BatchStagesService, TypeOrmModule],
 })
 export class BatchStagesModule {}

@@ -7,6 +7,7 @@ import { AuthModule } from './auth/auth.module';
 import { CompaniesModule } from './companies/companies.module';
 import { BatchStagesModule } from './batch_stages/batch_stages.module';
 import { BatchesModule } from './batches/batches.module';
+import { DailyMealsModule } from './daily_meals/daily_meals.module';
 
 @Module({
   imports: [
@@ -32,7 +33,8 @@ import { BatchesModule } from './batches/batches.module';
     AuthModule,
     CompaniesModule,
     BatchesModule,
-    BatchStagesModule
+    BatchStagesModule,
+    DailyMealsModule
   ],
 })
 export class AppModule {}
