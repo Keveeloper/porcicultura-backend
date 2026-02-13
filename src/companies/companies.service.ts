@@ -41,7 +41,6 @@ export class CompaniesService {
       }
 
       // Si es cualquier otro error, lanzamos un 500 genérico para no exponer la DB
-      console.error('Unexpected DB Error:', error);
       throw new InternalServerErrorException('An unexpected error occurred', error.message);
     }
   }

@@ -1,8 +1,9 @@
-import { BadRequestException, Injectable, InternalServerErrorException } from '@nestjs/common';
+import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { CreateBatchStageDto } from './dto/create-batch_stage.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { BatchStage } from './entities/batch_stage.entity';
 import { Repository } from 'typeorm';
+import { BatchStageStatus } from './entities/types';
 
 @Injectable()
 export class BatchStagesService {
@@ -42,7 +43,27 @@ export class BatchStagesService {
 
       return await this.batchStageRepository.save(newBatchStage);
     } catch (error) {
-      throw new InternalServerErrorException('Error creating batch stage', error.message);
+      throw new InternalServerErrorException(error.message);
+    }
+  }
+
+  async getBatchStageById(id: string){
+    const existingBatchStage = await this.batchStageRepository.findOne({
+      where: {id},
+    });
+    if (!existingBatchStage) {
+      throw new NotFoundException(`BatchStage with ID ${id} not found`);
+    }
+    return existingBatchStage;
+  }
+
+  async updateStatus(id: string, status: BatchStageStatus){
+    const batchStage = await this.getBatchStageById(id);
+    try {
+      batchStage.status = status;
+      return await this.batchStageRepository.save(batchStage);
+    } catch (error) {
+      throw new InternalServerErrorException( error.message);
     }
   }
 

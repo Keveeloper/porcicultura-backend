@@ -4,6 +4,7 @@ import { DailyMeal } from './entities/daily_meal.entity';
 import { Repository } from 'typeorm';
 import { BatchStagesService } from 'src/batch_stages/batch_stages.service';
 import { CreateDailyMealDto } from './dtos/create-daily_meal.dto';
+import { BatchStageStatus } from 'src/batch_stages/entities/types';
 
 @Injectable()
 export class DailyMealsService {
@@ -14,22 +15,34 @@ export class DailyMealsService {
   ) {}
 
   async createDailyMeals(records: CreateDailyMealDto[]){
+    const batchStageId = records[0].batch_stage_id;
     try {
+      const batchStage = await this.batchStagesService.getBatchStageById(batchStageId);
+
       const recordsToUpsert = records.map(record => ({
         ...record,
         batchStage: { id: record.batch_stage_id }
       }));
 
-      const savedRecords = await this.dailyMelaRepository.upsert(recordsToUpsert, {
+      await this.dailyMelaRepository.upsert(recordsToUpsert, {
         conflictPaths: ['batchStage', 'date'],
         skipUpdateIfNoValuesChanged: true
       })
 
-      return savedRecords;
-    } catch (error) {
-      console.log('error: ', error);
+      if (batchStage.status === BatchStageStatus.PENDING) {
+        await this.batchStagesService.updateStatus(batchStageId, BatchStageStatus.IN_PROGRESS)
+      }
 
-      throw new InternalServerErrorException(`Error creating daily meals: ${error.message || error}`);
+      return {
+        message: 'Daily meals processed successfully',
+        count: records.length,
+        stageStatus: batchStage.status === BatchStageStatus.PENDING ? BatchStageStatus.IN_PROGRESS : batchStage.status
+      };
+    } catch (error) {
+      if (error.status && error.status < 500) {
+        throw error;
+      }
+      throw new InternalServerErrorException(`Error creating daily meals: ${error.message}`);
     }
   }
 }
