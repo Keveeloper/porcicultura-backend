@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Req, UseGuards } from '@nestjs/common';
+import { Controller, Post, Body, UseGuards } from '@nestjs/common';
 import { CompaniesService } from './companies.service';
 import { CreateCompanyDto } from './dtos/create-company.dto';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
@@ -13,7 +13,6 @@ export class CompaniesController {
   async completeRegistration(
     @Body() createCompanyDto: CreateCompanyDto,
     @CurrentUser() user: { userId: string },
-    // @Body('userId') userId: string, // En una app real, esto vendría del JWT decodificado
   ) {
     return await this.companiesService.createAndAssignUser(user.userId, createCompanyDto);
   }
