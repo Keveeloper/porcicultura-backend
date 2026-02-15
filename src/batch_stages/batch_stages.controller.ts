@@ -8,6 +8,14 @@ import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 export class BatchStagesController {
   constructor(private readonly batchStagesService: BatchStagesService) {}
 
+  @Get('/batch/:batchId/batch-stage/:batchStageId')
+  getOneBatchStage(
+    @Param('batchId',) batchId: string,
+    @Param('batchStageId',) batchStageId: string,
+  ){
+    return this.batchStagesService.getOneBatchStage(batchId, batchStageId);
+  }
+
   @Get('/batch/:batchId')
   getAllBatchStages(@Param('batchId') batchId: string){
     return this.batchStagesService.getBatchStagesByBatchId(batchId);

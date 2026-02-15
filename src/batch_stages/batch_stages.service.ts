@@ -17,6 +17,17 @@ export class BatchStagesService {
     return batcheStages;
   }
 
+  async getOneBatchStage(batchId: string, batchStageId: string) {
+    const batcheStages = await this.batchStageRepository.findOne({
+      where: {
+        batch: { id: batchId },
+        id: batchStageId
+      },
+      relations: ['batch']
+    });
+    return batcheStages;
+  }
+
   async create(createBatchStageDto: CreateBatchStageDto) {
     const { batchId, stage_type } = createBatchStageDto;
 
