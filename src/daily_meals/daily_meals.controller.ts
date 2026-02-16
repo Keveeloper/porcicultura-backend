@@ -1,13 +1,23 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Param, Post, UseGuards } from '@nestjs/common';
 import { DailyMealsService } from './daily_meals.service';
 import { CreateDailyMealDto } from './dtos/create-daily_meal.dto';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 
 @Controller('daily-meals')
+@UseGuards(JwtAuthGuard)
 export class DailyMealsController {
-  constructor(private readonly dailyMealsService: DailyMealsService) {}
+  constructor(
+    private readonly dailyMealsService: DailyMealsService
+  ) {}
 
-  @Post()
-  create(@Body() createDailyMealDto: CreateDailyMealDto[]) {
-    return this.dailyMealsService.createDailyMeals(createDailyMealDto);
+  @Post('batch/:batchId/batch-stage/:batchStageId')
+  create(
+    @Param('batchId') batchId: string,
+    @Param('batchStageId') batchStageId: string,
+    @Body() createDailyMealDto: CreateDailyMealDto[]
+  ) {
+    // Pasamos los IDs de la URL al servicio
+    return this.dailyMealsService.createDailyMeals(batchId, batchStageId, createDailyMealDto);
   }
+
 }

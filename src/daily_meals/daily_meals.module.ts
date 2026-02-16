@@ -9,6 +9,6 @@ import { BatchStagesModule } from 'src/batch_stages/batch_stages.module';
   imports: [TypeOrmModule.forFeature([DailyMeal]), BatchStagesModule],
   controllers: [DailyMealsController],
   providers: [DailyMealsService],
-  exports: [DailyMealsService]
+  exports: [DailyMealsService, TypeOrmModule]
 })
 export class DailyMealsModule {}

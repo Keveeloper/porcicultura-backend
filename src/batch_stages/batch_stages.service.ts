@@ -23,7 +23,7 @@ export class BatchStagesService {
         batch: { id: batchId },
         id: batchStageId
       },
-      relations: ['batch']
+      relations: ['dailyMeals', 'batch']
     });
     return batcheStages;
   }
