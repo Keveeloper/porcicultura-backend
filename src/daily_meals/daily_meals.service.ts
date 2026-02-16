@@ -5,6 +5,17 @@ import { Repository } from 'typeorm';
 import { BatchStagesService } from 'src/batch_stages/batch_stages.service';
 import { CreateDailyMealDto } from './dtos/create-daily_meal.dto';
 import { BatchStageStatus } from 'src/batch_stages/entities/types';
+// import { BatchStage } from 'src/batch_stages/entities/batch_stage.entity';
+
+// export interface BatchStageWithMetrics extends BatchStage {
+//   metrics: {
+//     cumulative_feed: string;
+//     cumulative_mortality: number;
+//     mortality_percentage: string;
+//     current_pig_balance: number;
+//     fcr: string;
+//   };
+// }
 
 @Injectable()
 export class DailyMealsService {
@@ -48,31 +59,22 @@ export class DailyMealsService {
 
   async createDailyMeals(batchId: string, batchStageId: string, records: CreateDailyMealDto[]) {
     try {
-      // 1. Verificamos que la etapa exista y pertenezca al lote
       const batchStage = await this.batchStagesService.getOneBatchStage(batchId, batchStageId);
       if (!batchStage) {
         throw new NotFoundException('La etapa no coincide con el lote proporcionado');
       }
-
-      // 2. Preparamos los registros para el UPSERT
       const recordsToUpsert = records.map(record => ({
         ...record,
-        date: new Date(record.date),
+        date: record.date,
         batchStage: { id: batchStageId }
       }));
-
-      // 3. Guardamos/Actualizamos masivamente
       await this.dailyMealRepository.upsert(recordsToUpsert, {
         conflictPaths: ['batchStage', 'date'],
         skipUpdateIfNoValuesChanged: true
       });
-
-      // 4. Actualizamos estado si estaba pendiente
       if (batchStage.status === BatchStageStatus.PENDING) {
         await this.batchStagesService.updateStatus(batchStageId, BatchStageStatus.IN_PROGRESS);
       }
-
-      // 5. Retornamos el objeto completo con métricas calculadas
       return this.getBatchStageMetrics(batchId, batchStageId);
 
     } catch (error) {
@@ -80,6 +82,45 @@ export class DailyMealsService {
       throw new InternalServerErrorException(`Error al procesar registros diarios: ${error.message}`);
     }
   }
+
+  // daily_meals.service.ts
+  /*async getBatchStageMetrics(batchId: string, batchStageId: string) {
+    const batchStage = await this.batchStagesService.getOneBatchStage(batchId, batchStageId);
+
+    if (!batchStage) {
+      throw new BadRequestException('Batch stage does not exist');
+    }
+
+    // Cálculos de acumulados
+    const totals = batchStage.dailyMeals.reduce((acc, curr) => {
+      acc.feed += Number(curr.feed_kg);
+      acc.deaths += curr.mortality;
+      return acc;
+    }, { feed: 0, deaths: 0 });
+
+    const currentPigs = batchStage.initial_pigs - totals.deaths;
+
+    // LOGICA PARA FCR (Solo si hay peso final)
+    const weightGain = batchStage.final_batch_weight
+      ? Number(batchStage.final_batch_weight) - Number(batchStage.initial_batch_weight)
+      : 0;
+
+    // --- LA SOLUCIÓN AQUÍ ---
+    // Convertimos a JSON y de vuelta a Objeto para limpiar metadatos de TypeORM
+    const metrics = {
+      cumulative_feed: totals.feed.toFixed(2),
+      cumulative_mortality: totals.deaths,
+      mortality_percentage: ((totals.deaths / batchStage.initial_pigs) * 100).toFixed(2),
+      current_pig_balance: currentPigs,
+      fcr: weightGain > 0 ? (totals.feed / weightGain).toFixed(2) : "0.00"
+    };
+
+    // Retornamos un objeto nuevo combinando todo de forma plana
+    return JSON.parse(JSON.stringify({
+      ...batchStage,
+      metrics
+    }));
+  }*/
 
   async getBatchStageMetrics(batchId: string, batchStageId: string) {
     // Obtenemos la etapa con todos sus registros históricos

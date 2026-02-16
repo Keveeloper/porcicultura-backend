@@ -1,8 +1,8 @@
 import { IsDateString, IsInt, IsNumber, IsOptional, IsString, IsUUID, Min } from "class-validator";
 
 export class CreateDailyMealDto {
-  @IsUUID()
-  batch_stage_id: string;
+  // @IsUUID()
+  // batch_stage_id: string;
 
   @IsDateString()
   date: string;

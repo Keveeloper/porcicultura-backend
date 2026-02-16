@@ -27,3 +27,18 @@ export class WrapResponseInterceptor implements NestInterceptor {
     );
   }
 }
+// export class WrapResponseInterceptor implements NestInterceptor {
+//   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
+//     return next.handle().pipe(
+//       map((data: unknown) => {
+//         // Si el controlador ya devolvió algo envuelto (ej. paginación), no lo vuelvas a envolver
+//         if (data && typeof data === 'object' && 'data' in data) {
+//           return data;
+//         }
+
+//         // Siempre envolvemos en 'data' para consistencia
+//         return { data: data ?? null };
+//       }),
+//     );
+//   }
+// }
