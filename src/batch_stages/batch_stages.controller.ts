@@ -18,7 +18,7 @@ export class BatchStagesController {
     @Param('batchId',) batchId: string,
     @Param('batchStageId',) batchStageId: string,
   ){
-    return this.batchStagesService.getOneBatchStage(batchId, batchStageId);
+    return this.batchStagesService.getBatchStageMetrics(batchId, batchStageId);
   }
 
   // @Get('/batch/:batchId/batch-stage/:batchStageId')

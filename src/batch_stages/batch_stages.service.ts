@@ -28,6 +28,39 @@ export class BatchStagesService {
     return batcheStages;
   }
 
+  async getBatchStageMetrics(batchId: string, batchStageId: string) {
+    // Obtenemos la etapa con todos sus registros históricos
+    const batchStage = await this.getOneBatchStage(batchId, batchStageId)
+
+    if (batchStage) {
+
+      // Cálculos de acumulados (Como en tu imagen de Excel)
+      const totals = batchStage.dailyMeals.reduce((acc, curr) => {
+        acc.feed += Number(curr.feed_kg);
+        acc.deaths += curr.mortality;
+        return acc;
+      }, { feed: 0, deaths: 0 });
+      const currentPigs = batchStage.initial_pigs - totals.deaths;
+      // Peso total ganado (Simulación: asumiendo que el peso final se actualiza en la etapa)
+      const weightGain = batchStage.final_batch_weight
+        ? Number(batchStage.final_batch_weight) - Number(batchStage.initial_batch_weight)
+        : 0;
+
+        return {
+          ...batchStage,
+          metrics: {
+            cumulative_feed: totals.feed.toFixed(2),
+            cumulative_mortality: totals.deaths,
+            mortality_percentage: ((totals.deaths / batchStage.initial_pigs) * 100).toFixed(2),
+            current_pig_balance: currentPigs,
+            // FCR = Alimento total / Ganancia de peso
+            fcr: weightGain > 0 ? (totals.feed / weightGain).toFixed(2) : "0.00"
+          }
+        };
+    }
+    throw new BadRequestException('Batch stage does not exists');
+  }
+
   async create(createBatchStageDto: CreateBatchStageDto) {
     const { batchId, stage_type } = createBatchStageDto;
 

@@ -21,7 +21,9 @@ export class BatchesController {
     }
 
     @Get()
-    getAllBatches(){
-      return this.batchService.getAllBatches();
+    getAllBatches(
+      @CurrentUser() user: User
+    ) {
+      return this.batchService.getAllBatches(user.id);
     }
 }

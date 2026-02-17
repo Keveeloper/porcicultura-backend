@@ -3,7 +3,7 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 @Injectable()
-export class WrapResponseInterceptor implements NestInterceptor {
+/*export class WrapResponseInterceptor implements NestInterceptor {
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
 
     // Si la respuesta es una promesa el 'data' es el resultado final.
@@ -26,19 +26,19 @@ export class WrapResponseInterceptor implements NestInterceptor {
       }),
     );
   }
-}
-// export class WrapResponseInterceptor implements NestInterceptor {
-//   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
-//     return next.handle().pipe(
-//       map((data: unknown) => {
-//         // Si el controlador ya devolvió algo envuelto (ej. paginación), no lo vuelvas a envolver
-//         if (data && typeof data === 'object' && 'data' in data) {
-//           return data;
-//         }
+}*/
+export class WrapResponseInterceptor implements NestInterceptor {
+  intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
+    return next.handle().pipe(
+      map((data: unknown) => {
+        // Si el controlador ya devolvió algo envuelto (ej. paginación), no lo vuelvas a envolver
+        if (data && typeof data === 'object' && 'data' in data) {
+          return data;
+        }
 
-//         // Siempre envolvemos en 'data' para consistencia
-//         return { data: data ?? null };
-//       }),
-//     );
-//   }
-// }
+        // Siempre envolvemos en 'data' para consistencia
+        return { data: data ?? null };
+      }),
+    );
+  }
+}
