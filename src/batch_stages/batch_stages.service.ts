@@ -4,12 +4,14 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { BatchStage } from './entities/batch_stage.entity';
 import { Repository } from 'typeorm';
 import { BatchStageStatus } from './entities/types';
+import { ShowMetricsDto } from './dto/show-metrics.dto';
 
 @Injectable()
 export class BatchStagesService {
   constructor(
     @InjectRepository(BatchStage)
     private readonly batchStageRepository: Repository<BatchStage>,
+    // private showMetricsDto: ShowMetricsDto
   ) {}
 
   async getBatchStagesByBatchId(batchId: string) {
@@ -46,16 +48,25 @@ export class BatchStagesService {
         ? Number(batchStage.final_batch_weight) - Number(batchStage.initial_batch_weight)
         : 0;
 
+        const metrics = new ShowMetricsDto(
+          totals.feed.toFixed(2),
+          totals.deaths,
+          ((totals.deaths / batchStage.initial_pigs) * 100).toFixed(2),
+          currentPigs,
+          weightGain > 0 ? (totals.feed / weightGain).toFixed(2) : "0.00"
+        );
+
         return {
           ...batchStage,
-          metrics: {
-            cumulative_feed: totals.feed.toFixed(2),
-            cumulative_mortality: totals.deaths,
-            mortality_percentage: ((totals.deaths / batchStage.initial_pigs) * 100).toFixed(2),
-            current_pig_balance: currentPigs,
-            // FCR = Alimento total / Ganancia de peso
-            fcr: weightGain > 0 ? (totals.feed / weightGain).toFixed(2) : "0.00"
-          }
+          metrics
+          // metrics: {
+          //   cumulative_feed: totals.feed.toFixed(2),
+          //   cumulative_mortality: totals.deaths,
+          //   mortality_percentage: ((totals.deaths / batchStage.initial_pigs) * 100).toFixed(2),
+          //   current_pig_balance: currentPigs,
+          //   // FCR = Alimento total / Ganancia de peso
+          //   fcr: weightGain > 0 ? (totals.feed / weightGain).toFixed(2) : "0.00"
+          // }
         };
     }
     throw new BadRequestException('Batch stage does not exists');
