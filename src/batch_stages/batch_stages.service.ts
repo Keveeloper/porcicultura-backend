@@ -47,14 +47,15 @@ export class BatchStagesService {
       const weightGain = batchStage.final_batch_weight
         ? Number(batchStage.final_batch_weight) - Number(batchStage.initial_batch_weight)
         : 0;
-
-        const metrics = new ShowMetricsDto(
-          totals.feed.toFixed(2),
-          totals.deaths,
-          ((totals.deaths / batchStage.initial_pigs) * 100).toFixed(2),
-          currentPigs,
-          weightGain > 0 ? (totals.feed / weightGain).toFixed(2) : "0.00"
-        );
+      const cumulative_feed_pig = (Number(totals.feed.toFixed(2)) / currentPigs);
+      const metrics = new ShowMetricsDto(
+        totals.feed.toFixed(2),
+        totals.deaths,
+        ((totals.deaths / batchStage.initial_pigs) * 100).toFixed(2),
+        cumulative_feed_pig.toFixed(2),
+        currentPigs,
+        weightGain > 0 ? (totals.feed / weightGain).toFixed(2) : "0.00"
+      );
 
         return {
           ...batchStage,
