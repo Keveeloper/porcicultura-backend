@@ -24,8 +24,6 @@ export class BatchesController {
     getAllBatches(
       @CurrentUser() user: User
     ) {
-      console.log('User logged: ', user);
-
       return this.batchService.getAllBatches(user.id);
     }
 }

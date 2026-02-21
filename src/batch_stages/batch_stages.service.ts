@@ -5,6 +5,7 @@ import { BatchStage } from './entities/batch_stage.entity';
 import { Repository } from 'typeorm';
 import { BatchStageStatus } from './entities/types';
 import { ShowMetricsDto } from './dto/show-metrics.dto';
+import { start } from 'repl';
 
 @Injectable()
 export class BatchStagesService {
@@ -90,12 +91,20 @@ export class BatchStagesService {
     }
 
     try {
-      const start_date = new Date(createBatchStageDto.start_date);
+
+      const rawDate = new Date(createBatchStageDto.start_date);
+      const start_date = new Date(
+        rawDate.getUTCFullYear(),
+        rawDate.getUTCMonth(),
+        rawDate.getUTCDate()
+      );
       const number_of_weeks = createBatchStageDto.number_of_weeks;
       const end_date = new Date(
         start_date.getTime() + number_of_weeks * 7 * 24 * 60 * 60 * 1000,
       );
       createBatchStageDto['end_date'] = end_date;
+      createBatchStageDto['start_date'] = start_date as any;
+
       const newBatchStage = this.batchStageRepository.create({
         ...createBatchStageDto,
         end_date: end_date,
