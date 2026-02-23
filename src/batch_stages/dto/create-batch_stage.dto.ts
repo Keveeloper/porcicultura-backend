@@ -1,4 +1,4 @@
-import { IsDate, IsEnum, IsNotEmpty, IsNumber, IsUUID } from "class-validator";
+import { IsDate, IsEnum, IsNotEmpty, IsNumber, IsOptional, IsUUID } from "class-validator";
 import { BatchStageType } from "../entities/types";
 
 export class CreateBatchStageDto {
@@ -29,5 +29,9 @@ export class CreateBatchStageDto {
   @IsNumber()
   @IsNotEmpty()
   initial_pig_weight: number;
+
+  @IsNumber()
+  @IsOptional() // Importante: es opcional en la creación
+  final_batch_weight?: number;
 
 }

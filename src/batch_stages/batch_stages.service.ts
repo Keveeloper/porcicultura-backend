@@ -6,6 +6,7 @@ import { Repository } from 'typeorm';
 import { BatchStageStatus } from './entities/types';
 import { ShowMetricsDto } from './dto/show-metrics.dto';
 import { start } from 'repl';
+import { UpdateBatchStageDto } from './dto/update-batch_stage.dto';
 
 @Injectable()
 export class BatchStagesService {
@@ -134,6 +135,19 @@ export class BatchStagesService {
       return await this.batchStageRepository.save(batchStage);
     } catch (error) {
       throw new InternalServerErrorException( error.message);
+    }
+  }
+
+  async finishStage(batchId: string, stageId: string, updateBatchStageDto: UpdateBatchStageDto) {
+    const batchStage = await this.getOneBatchStage(batchId, stageId);
+    if (!batchStage) {
+      throw new NotFoundException(`Batch stage with ID ${stageId} not found in batch ${batchId}`);
+    }
+    try {
+      Object.assign(batchStage, updateBatchStageDto);
+      return await this.batchStageRepository.save(batchStage);
+    } catch (error) {
+      throw new InternalServerErrorException(error.message);
     }
   }
 

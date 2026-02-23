@@ -1,8 +1,9 @@
-import { Controller, Post, Body, UseGuards, Get, Param } from '@nestjs/common';
+import { Controller, Post, Body, UseGuards, Get, Param, Patch } from '@nestjs/common';
 import { BatchStagesService } from './batch_stages.service';
 import { CreateBatchStageDto } from './dto/create-batch_stage.dto';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { DailyMealsService } from 'src/daily_meals/daily_meals.service';
+import { UpdateBatchStageDto } from './dto/update-batch_stage.dto';
 
 @Controller('batch-stages')
 @UseGuards(JwtAuthGuard)
@@ -28,6 +29,15 @@ export class BatchStagesController {
   @Post()
   create(@Body() createBatchStageDto: CreateBatchStageDto) {
     return this.batchStagesService.create(createBatchStageDto);
+  }
+
+  @Patch('/batch/:batchId/batch-stage/:stageId/finish-stage')
+  finishStage(
+    @Param('batchId') batchId: string,
+    @Param('stageId') stageId: string,
+    @Body() updateBatchStageDto: UpdateBatchStageDto
+  ) {
+    return this.batchStagesService.finishStage(batchId, stageId, updateBatchStageDto);
   }
 
 }
