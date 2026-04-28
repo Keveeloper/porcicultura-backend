@@ -49,14 +49,25 @@ export class BatchStagesService {
       const weightGain = batchStage.final_batch_weight
         ? Number(batchStage.final_batch_weight) - Number(batchStage.initial_batch_weight)
         : 0;
+      const final_pig_weight = batchStage.final_batch_weight / currentPigs;
       const cumulative_feed_pig = (Number(totals.feed.toFixed(2)) / currentPigs);
+      const weight_gain = final_pig_weight - batchStage.initial_pig_weight;
+      const fcr = (cumulative_feed_pig / weight_gain);
+      const day_quantity = batchStage.number_of_weeks * 7;
+      const daily_pig_gain = (weight_gain / day_quantity);
+      const daily_feed_pig = (cumulative_feed_pig / day_quantity);
       const metrics = new ShowMetricsDto(
         totals.feed.toFixed(2),
         totals.deaths,
         ((totals.deaths / batchStage.initial_pigs) * 100).toFixed(2),
         cumulative_feed_pig.toFixed(2),
         currentPigs,
-        weightGain > 0 ? (totals.feed / weightGain).toFixed(2) : "0.00"
+        // weightGain > 0 ? (totals.feed / weightGain).toFixed(2) : "0.00",
+        fcr.toFixed(2),
+        final_pig_weight.toFixed(2),
+        weight_gain.toFixed(2),
+        daily_pig_gain.toFixed(3),
+        daily_feed_pig.toFixed(3)
       );
 
         return {

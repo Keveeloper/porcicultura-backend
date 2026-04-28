@@ -12,8 +12,8 @@ export class CompaniesController {
   @UseGuards(JwtAuthGuard)
   async completeRegistration(
     @Body() createCompanyDto: CreateCompanyDto,
-    @CurrentUser() user: { userId: string },
+    @CurrentUser() user: { id: string },
   ) {
-    return await this.companiesService.createAndAssignUser(user.userId, createCompanyDto);
+    return await this.companiesService.createAndAssignUser(user.id, createCompanyDto);
   }
 }
