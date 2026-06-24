@@ -154,8 +154,14 @@ export class BatchStagesService {
     if (!batchStage) {
       throw new NotFoundException(`Batch stage with ID ${stageId} not found in batch ${batchId}`);
     }
+    if (batchStage.status !== BatchStageStatus.IN_PROGRESS) {
+      throw new BadRequestException(
+        `Only stages in progress can be completed. Current status: ${batchStage.status}`,
+      );
+    }
     try {
       Object.assign(batchStage, updateBatchStageDto);
+      batchStage.status = BatchStageStatus.COMPLETED;
       return await this.batchStageRepository.save(batchStage);
     } catch (error) {
       throw new InternalServerErrorException(error.message);
