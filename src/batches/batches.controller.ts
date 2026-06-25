@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
 import { CreateBatchDto } from './dtos/create-batch.dto';
 import { BatchesService } from './batches.service';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
@@ -25,5 +25,13 @@ export class BatchesController {
       @CurrentUser() user: User
     ) {
       return this.batchService.getAllBatches(user.id);
+    }
+
+    @Get(':batchId/final-report')
+    getFinalReport(
+      @Param('batchId') batchId: string,
+      @CurrentUser() user: User
+    ) {
+      return this.batchService.getFinalReport(batchId, user.id);
     }
 }
