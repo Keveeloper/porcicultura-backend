@@ -162,6 +162,21 @@ export class BatchStagesService {
     try {
       Object.assign(batchStage, updateBatchStageDto);
       batchStage.status = BatchStageStatus.COMPLETED;
+
+      // Peso final del lechón = peso final del lote / cerdos vivos al final de la etapa.
+      // Misma fórmula que getBatchStageMetrics: currentPigs = initial_pigs - Σ(mortality).
+      const deaths = (batchStage.dailyMeals ?? []).reduce(
+        (sum, dailyMeal) => sum + dailyMeal.mortality,
+        0,
+      );
+      const currentPigs = batchStage.initial_pigs - deaths;
+      const finalBatchWeight = Number(batchStage.final_batch_weight);
+      if (finalBatchWeight && currentPigs > 0) {
+        batchStage.final_pig_weight = Number(
+          (finalBatchWeight / currentPigs).toFixed(2),
+        );
+      }
+
       return await this.batchStageRepository.save(batchStage);
     } catch (error) {
       throw new InternalServerErrorException(error.message);

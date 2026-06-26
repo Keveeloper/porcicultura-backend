@@ -4,7 +4,13 @@ import { Batch } from './entities/batch.entity';
 import { DailyMeal } from 'src/daily_meals/entities/daily_meal.entity';
 import { Repository } from 'typeorm';
 import { CreateBatchDto } from './dtos/create-batch.dto';
-import { FinalReportDto, FeedConsumptionRow } from './dtos/final-report.dto';
+import {
+  FinalReportDto,
+  FeedConsumptionRow,
+  FeedConsumptionTotal,
+  WeightPerStageRow,
+  WeightPerStageTotal,
+} from './dtos/final-report.dto';
 import { BatchStageType } from 'src/batch_stages/entities/types';
 import { UsersService } from 'src/users/users.service';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
@@ -164,8 +170,117 @@ export class BatchesService {
         kilos,
         feed_per_pig,
         feed_per_day,
+        conv: null, // se completa más abajo, depende de la ganancia (weight_per_stage).
       });
     }
+
+    // PESO PROMEDIO CERDOS POR ETAPAS, en el mismo orden que el consumo.
+    // INICIAL = initial_pig_weight, FINAL = final_pig_weight (de la etapa).
+    // GANANCIA = final - inicial, GAN/DIA = ganancia / días de la etapa.
+    const weight_per_stage: WeightPerStageRow[] = [];
+    for (const stageType of stageOrder) {
+      const stage = batch.stages?.find((s) => s.stage_type === stageType);
+      if (!stage) continue;
+
+      const initial_weight = Number(stage.initial_pig_weight);
+      const final_weight =
+        stage.final_pig_weight != null ? Number(stage.final_pig_weight) : null;
+
+      const gain =
+        final_weight != null
+          ? Math.round((final_weight - initial_weight) * 100) / 100
+          : null;
+
+      // GAN/DIA reutiliza los días ya calculados en feed_consumption para la etapa.
+      const days =
+        feed_consumption.find((row) => row.stage === stageType)?.days ?? 0;
+      const gain_per_day =
+        gain != null && days > 0 ? Math.round((gain / days) * 1000) / 1000 : null;
+
+      weight_per_stage.push({
+        stage: stageType,
+        initial_weight,
+        final_weight,
+        gain,
+        gain_per_day,
+      });
+    }
+
+    // CONV = consumo por cerdo / ganancia de peso de la etapa.
+    // Se hace al final porque enlaza feed_consumption (feed_per_pig) con weight_per_stage (gain).
+    for (const row of feed_consumption) {
+      const gain = weight_per_stage.find((w) => w.stage === row.stage)?.gain ?? null;
+      row.conv =
+        row.feed_per_pig != null && gain != null && gain > 0
+          ? Math.round((row.feed_per_pig / gain) * 100) / 100
+          : null;
+    }
+
+    // TOTALES PESO PROMEDIO: inicial de la primera etapa, final de la última.
+    const firstWeight = weight_per_stage[0] ?? null;
+    const lastWeight = weight_per_stage[weight_per_stage.length - 1] ?? null;
+    const total_initial_weight = firstWeight ? firstWeight.initial_weight : null;
+    const total_final_weight = lastWeight ? lastWeight.final_weight : null;
+    const total_gain =
+      total_initial_weight != null && total_final_weight != null
+        ? Math.round((total_final_weight - total_initial_weight) * 100) / 100
+        : null;
+
+    // TOTALES CONSUMO ALIMENTO: días y kilos son sumas; el resto sigue las mismas fórmulas que por etapa.
+    const total_days = feed_consumption.reduce((sum, row) => sum + row.days, 0);
+    const total_kilos = feed_consumption.reduce((sum, row) => sum + row.kilos, 0);
+    const total_feed_per_pig =
+      final_pigs && final_pigs > 0
+        ? Math.round((total_kilos / final_pigs) * 100) / 100
+        : null;
+    const total_feed_per_day =
+      total_feed_per_pig != null && total_days > 0
+        ? Math.round((total_feed_per_pig / total_days) * 100) / 100
+        : null;
+    const total_conv =
+      total_feed_per_pig != null && total_gain != null && total_gain > 0
+        ? Math.round((total_feed_per_pig / total_gain) * 100) / 100
+        : null;
+
+    const feed_consumption_total: FeedConsumptionTotal = {
+      days: total_days,
+      kilos: total_kilos,
+      feed_per_pig: total_feed_per_pig,
+      feed_per_day: total_feed_per_day,
+      conv: total_conv,
+    };
+
+    const total_gain_per_day =
+      total_gain != null && total_days > 0
+        ? Math.round((total_gain / total_days) * 1000) / 1000
+        : null;
+
+    const weight_per_stage_total: WeightPerStageTotal = {
+      initial_weight: total_initial_weight,
+      final_weight: total_final_weight,
+      gain: total_gain,
+      gain_per_day: total_gain_per_day,
+    };
+
+    // TOTALES FINALES DEL LOTE.
+    // TOTAL PESO LOTE GRANJA = peso final por cerdo * número final de cerdos.
+    const total_batch_weight_farm =
+      total_final_weight != null && final_pigs != null
+        ? Math.round(total_final_weight * final_pigs * 100) / 100
+        : null;
+
+    // TOTAL PESO LOTE SACRIFICIO = peso de granja - 2% de merma (granja * 0.98).
+    const SLAUGHTER_SHRINKAGE = 0.02;
+    const total_batch_weight_slaughter =
+      total_batch_weight_farm != null
+        ? Math.round(total_batch_weight_farm * (1 - SLAUGHTER_SHRINKAGE) * 100) / 100
+        : null;
+
+    // PROMEDIO PESO SACRIFICIO = peso de sacrificio / número final de cerdos.
+    const average_slaughter_weight =
+      total_batch_weight_slaughter != null && final_pigs && final_pigs > 0
+        ? Math.round((total_batch_weight_slaughter / final_pigs) * 100) / 100
+        : null;
 
     return {
       farm_name: batch.company?.name ?? null,
@@ -178,6 +293,12 @@ export class BatchesService {
       mortality,
       mortality_percentage,
       feed_consumption,
+      feed_consumption_total,
+      weight_per_stage,
+      weight_per_stage_total,
+      total_batch_weight_farm,
+      total_batch_weight_slaughter,
+      average_slaughter_weight,
     };
   }
 
